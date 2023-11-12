@@ -1,5 +1,6 @@
 from collections import deque
 import time
+import networkx as nx
 
 
 class Graph:
@@ -7,7 +8,7 @@ class Graph:
     def __init__(self):
         self.V = 0
         self.adj_list = {}  # adjacency list
-
+        self.shortest_paths = {}  # shortest paths
 
     def read_input(self, filename):
         with open("testcases/" + filename, "r") as f:
@@ -27,11 +28,13 @@ class Graph:
                 self.adj_list[u].append(v)
                 self.adj_list[v].append(u)
 
+        # init shortest paths
+        self.shortest_paths = dict(nx.all_pairs_shortest_path_length(nx.Graph(self.adj_list)))
         # return everything
         return T, D, sa, ta, sb, tb
 
     # calc shortest path distance between 2 nodes
-    def distance(self, va, vb):
+    def dist(self, va, vb):
         # obvious base case
         if va == vb:
             return 0
@@ -54,6 +57,9 @@ class Graph:
                     queue.append(neighbor)
         return -1  # no path
 
+    def distance(self, va, vb):
+        return self.shortest_paths[va][vb]
+
     # Function to reconstruct the paths from a predecessor map given the start and end states
     def reconstruct_paths(self, pred, start_state, end_state):
         path_a, path_b = [], []  # init paths
@@ -68,7 +74,6 @@ class Graph:
         # start state missing so add it
         path_a.insert(0, start_state[0])
         path_b.insert(0, start_state[1])
-
 
         return path_a, path_b
 
@@ -103,12 +108,10 @@ class Graph:
         return ([], []), False  # reutrn empty and false if no sol
 
 
-
 def main():
     g = Graph()  # Create a new Graph object
     # read input from user. remove the input() if it should be different idk
     T, D, sa, ta, sb, tb = g.read_input(input("Enter filename: "))
-
 
     start_time = time.time()
 
@@ -128,7 +131,6 @@ def main():
     # tiem taken
     print("Time taken: {:.2f}ms".format(duration * 1000))
     # I think time complexity for this might be O(T*V^2) but idk
-
 
 
 if __name__ == "__main__":
