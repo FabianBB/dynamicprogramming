@@ -1,6 +1,7 @@
 from collections import deque
 import time
 import networkx as nx
+import sys
 
 
 class Graph:
@@ -33,29 +34,6 @@ class Graph:
         # return everything
         return T, D, sa, ta, sb, tb
 
-    # calc shortest path distance between 2 nodes
-    def dist(self, va, vb):
-        # obvious base case
-        if va == vb:
-            return 0
-
-        # init BFS queueue
-        queue = deque([va])
-        visited = [False] * self.V
-        visited[va] = True
-        distance = [0] * self.V  # init distance array
-
-        # BFS
-        while queue:
-            current = queue.popleft()
-            for neighbor in self.adj_list[current]:
-                if not visited[neighbor]:
-                    visited[neighbor] = True
-                    distance[neighbor] = distance[current] + 1
-                    if neighbor == vb:
-                        return distance[neighbor]  # return distance if target found
-                    queue.append(neighbor)
-        return -1  # no path
 
     def distance(self, va, vb):
         return self.shortest_paths[va][vb]
@@ -110,8 +88,9 @@ class Graph:
 
 def main():
     g = Graph()  # Create a new Graph object
-    # read input from user. remove the input() if it should be different idk
-    T, D, sa, ta, sb, tb = g.read_input(input("Enter filename: "))
+    # get command line argument or input
+    filename = sys.argv[1] if len(sys.argv) > 1 else input("Enter filename: ")
+    T, D, sa, ta, sb, tb = g.read_input(filename)
 
     start_time = time.time()
 
@@ -120,7 +99,8 @@ def main():
     duration = time.time() - start_time
 
     # print paths nad lengths if sol found
-    if success:
+    # check if length of path is less than T as per instructions
+    if success and len(path_a) - 1 <= T:
         print(len(path_a) - 1)  # Length of path a
         print(' '.join(str(v + 1) for v in path_a))  # a
         print(' '.join(str(v + 1) for v in path_b))  # b
@@ -130,8 +110,38 @@ def main():
 
     # tiem taken
     print("Time taken: {:.2f}ms".format(duration * 1000))
-    # I think time complexity for this might be O(T*V^2) but idk
+    # I think time complexity for this might be O(T*V^3) but idk
 
 
 if __name__ == "__main__":
     main()
+
+
+
+
+# calc shortest path distance between 2 nodes
+# obsolete code, used networkx instead
+# could just call this in a for loop and create the shortest paths dict that way, but netowrkx is more optimized
+# since it only gets created once anyways, it doesnt affect runtime that much.
+def dist(self, va, vb):
+    # obvious base case
+    if va == vb:
+        return 0
+
+    # init BFS queueue
+    queue = deque([va])
+    visited = [False] * self.V
+    visited[va] = True
+    distance = [0] * self.V  # init distance array
+
+    # BFS
+    while queue:
+        current = queue.popleft()
+        for neighbor in self.adj_list[current]:
+            if not visited[neighbor]:
+                visited[neighbor] = True
+                distance[neighbor] = distance[current] + 1
+                if neighbor == vb:
+                    return distance[neighbor]  # return distance if target found
+                queue.append(neighbor)
+    return -1  # no path
