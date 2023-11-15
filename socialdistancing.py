@@ -56,34 +56,31 @@ class Graph:
         return path_a, path_b
 
     # Function to find paths for two individuals that are at least D units apart at all times
+    # Function to find paths for two individuals that are at least D units apart at all times and do not exceed path length T
     def socially_distant_paths(self, sa, ta, sb, tb, D, T):
-        # intial positions
-        queue = deque([(sa, sb)])
-        # start is obvoiously visited
-        visited = {(sa, sb): True}
-        pred = {}  # keep track of predecessors to map later
+        queue = deque([((sa, sb), 0)])  # Initialize queue with start positions and path length 0
+        visited = {(sa, sb): True}  # Mark start positions as visited
+        pred = {}  # Predecessor map for path reconstruction
 
-        # BFS to find valid paths within the constraints
         while queue:
-            pa, pb = queue.popleft()
+            (pa, pb), length = queue.popleft()  # Get current positions and path length
 
-            # check if the end state is reached
-            if pa == ta and pb == tb:
+            if pa == ta and pb == tb:  # Check if end state is reached
                 return self.reconstruct_paths(pred, (sa, sb), (ta, tb)), True
 
-            # Explore all neighbor pairs for the current state
-            for neighbor_a in self.adj_list[pa]:
-                for neighbor_b in self.adj_list[pb]:
-                    # ensure more than D distance
-                    if self.distance(neighbor_a, neighbor_b) > D:
-                        new_state = (neighbor_a, neighbor_b)
-                        # If new state not visited add to the queue and mark as visited
-                        if new_state not in visited:
-                            queue.append(new_state)
-                            visited[new_state] = True
-                            pred[new_state] = (pa, pb)
+            if length < T:  # ensure shorter than T
+                # check all neighbour pairs
+                for neighbor_a in self.adj_list[pa]:
+                    for neighbor_b in self.adj_list[pb]:
+                        # ensure more than D apart
+                        if self.distance(neighbor_a, neighbor_b) > D:
+                            new_state = (neighbor_a, neighbor_b)
+                            if new_state not in visited:  # unvisited
+                                queue.append((new_state, length + 1))  # Increment path length
+                                visited[new_state] = True  #
+                                pred[new_state] = (pa, pb)  # add to predecessor map
 
-        return ([], []), False  # reutrn empty and false if no sol
+        return ([], []), False  # Return empty and False if no solution is found
 
 
 def main():
@@ -100,7 +97,7 @@ def main():
 
     # print paths nad lengths if sol found
     # check if length of path is less than T as per instructions
-    if success and len(path_a) - 1 <= T:
+    if success:
         print(len(path_a) - 1)  # Length of path a
         print(' '.join(str(v + 1) for v in path_a))  # a
         print(' '.join(str(v + 1) for v in path_b))  # b
