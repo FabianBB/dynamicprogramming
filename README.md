@@ -1,3 +1,6 @@
+# 0 Execution
+To run the code simply execute  `python socialdistancing.py filename.in` or alternatively run `python socialdistancing.py` and then input `filename.in` when requested.
+
 # 1 Background
 During the last lockdown, tough social distancing regulations were put in place. This was particularly difficult for
 students at the Tongersestraat 53. With a combination of one-way staircases and hallways, the building became even
